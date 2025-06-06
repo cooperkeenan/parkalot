@@ -15,7 +15,7 @@ def main(mytimer: func.TimerRequest) -> None:
     password = os.environ.get("PARKALOT_PASS", "ApolloTheGreat!0")
 
     # -------------------------------------------------------------------
-    # 2) Calculate next Sunday (for testing). Build both "8th June" and "8 June".
+    # 2) Calculate next Sunday. Build both "8th June" and "8 June".
     # -------------------------------------------------------------------
     today = datetime.utcnow()
     days_ahead = 6 - today.weekday()  # Sunday = 6
@@ -34,47 +34,42 @@ def main(mytimer: func.TimerRequest) -> None:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
 
-            logging.info("➡️ Navigating to login page...")
+            logging.info("➡️  Navigating to login page...")
             page.goto("https://app.parkalot.io/login/", timeout=60000)
-
-            # Give the page a moment to start loading
             time.sleep(1)
 
-            logging.info("🔍 Waiting for email field...")
+            logging.info("🔍  Waiting for email field...")
             page.wait_for_selector('input[type="email"]', timeout=15000)
 
-            logging.info(f"✏️ Filling email: {email}")
+            logging.info(f"✏️  Filling email: {email}")
             page.fill('input[type="email"]', email)
 
-            logging.info("✏️ Filling password (hidden)...")
+            logging.info("✏️  Filling password (hidden)...")
             page.fill('input[type="password"]', password)
 
-            logging.info("🖱 Clicking LOG IN button...")
+            logging.info("🖱  Clicking LOG IN button...")
             page.click('button:has-text("LOG IN")')
 
             # ------------------------------------------------------------
             # 4) Wait for the “/client” URL and for the “UPCOMING” button
             # ------------------------------------------------------------
-            logging.info("⏳ Waiting for dashboard URL (/client)...")
+            logging.info("⏳  Waiting for dashboard URL (/client)...")
             page.wait_for_url("**/client", timeout=20000)
-            logging.info(f"✅ Logged in! Current URL: {page.url}")
+            logging.info(f"✅  Logged in! Current URL: {page.url}")
 
-            # Extra small delay to let post-login scripts finish
             time.sleep(2)
 
-            logging.info("🔍 Waiting for ‘UPCOMING’ button to confirm dashboard is ready...")
+            logging.info("🔍  Waiting for ‘UPCOMING’ button to confirm dashboard is ready...")
             page.wait_for_selector('button:has-text("UPCOMING")', timeout=20000)
-            logging.info("✅ ‘UPCOMING’ button found.")
+            logging.info("✅  ‘UPCOMING’ button found.")
 
             # ------------------------------------------------------------
             # 5) Click “ALL DAYS” so that next-week cards are visible
             # ------------------------------------------------------------
-            logging.info("🖱 Clicking ‘ALL DAYS’ to reveal full calendar...")
+            logging.info("🖱  Clicking ‘ALL DAYS’ to reveal full calendar...")
             page.click('button:has-text("ALL DAYS")', timeout=10000)
 
-            # Instead of waiting for a box-color selector (which can be flaky),
-            # just sleep a few seconds to let the UI render all day-cards on screen.
-            logging.info("⏳ Pausing 5 seconds for calendar to finish rendering...")
+            logging.info("⏳  Pausing 5 seconds for calendar to finish rendering...")
             time.sleep(5)
 
             # ------------------------------------------------------------
@@ -82,7 +77,7 @@ def main(mytimer: func.TimerRequest) -> None:
             # ------------------------------------------------------------
             cards = page.locator('div[class*="box-color"]')
             num_cards = cards.count()
-            logging.info(f"🗂 Found {num_cards} day-cards on the page.")
+            logging.info(f"🗂  Found {num_cards} day-cards on the page.")
             time.sleep(1)
 
             found_reservation = False
@@ -92,7 +87,6 @@ def main(mytimer: func.TimerRequest) -> None:
                 card_text = card.inner_text().strip()
                 lower_text = card_text.lower()
 
-                # Check if this card’s text contains one of our target date strings
                 if any(txt.lower() in lower_text for txt in possible_texts):
                     logging.info(f"▶ Found matching card (index {i}) for {possible_texts!r}:")
                     logging.info(f"   {card_text.replace(chr(10), ' | ')}")
@@ -124,18 +118,18 @@ def main(mytimer: func.TimerRequest) -> None:
                             time.sleep(8)
 
                             # ------------------------------------------------
-                            # 10) Wait a few seconds to see if “RELEASE” appears
+                            # 10) Try to detect “RELEASE” in the same calendar card
                             # ------------------------------------------------
                             try:
                                 card.wait_for_selector(
                                     'button:has-text("RELEASE")', timeout=8000
                                 )
                                 logging.info(
-                                    "    ✅ RELEASE appeared—reservation likely succeeded."
+                                    "    ✅ RELEASE appeared in calendar—reservation likely succeeded."
                                 )
                             except Exception:
                                 logging.warning(
-                                    "    ⚠️ RELEASE did NOT appear in this card. Booking may have failed."
+                                    "    ⚠️ RELEASE did NOT appear in calendar. Will check My Reservations."
                                 )
 
                             # ------------------------------------------------
@@ -151,18 +145,53 @@ def main(mytimer: func.TimerRequest) -> None:
                     if found_reservation:
                         break  # break out of the “cards” loop
                     else:
-                        logging.info(f"    ℹ️ No “RESERVE” clicked in card {i}, moving on.")
+                        logging.info(f"    ℹ️  No “RESERVE” clicked in card {i}, moving on.")
 
             if not found_reservation:
                 # ------------------------------------------------------------
                 # 12) If no “RESERVE” was clicked, grab a debug screenshot
                 # ------------------------------------------------------------
-                logging.error(f"❌ Could not find a “RESERVE” button for {possible_texts!r}.")
+                logging.error(f"❌  Could not find a “RESERVE” button for {possible_texts!r}.")
                 debug_path = os.path.join(os.getcwd(), "debug_fullpage.png")
                 page.screenshot(path=debug_path, full_page=True)
                 logging.info(f"    📸 Debug screenshot saved to {debug_path!r}")
+            else:
+                # ------------------------------------------------------------
+                # 13) Navigate to “My Reservations” to verify the new booking
+                # ------------------------------------------------------------
+                logging.info("🖱  Clicking ‘MY RESERVATIONS’ to view existing bookings…")
+                page.click('button:has-text("MY RESERVATIONS")', timeout=10000)
+
+                # Wait for the reservation cards to appear
+                logging.info("🔍  Waiting for reservation cards to appear…")
+                time.sleep(3)  # give it a moment to switch views
+                res_cards = page.locator('div[class*="box-color"]')
+                num_res = res_cards.count()
+                logging.info(f"🔍  Found {num_res} reservation cards in “My Reservations.”")
+
+                found_release_in_res = False
+                for k in range(num_res):
+                    res_card = res_cards.nth(k)
+                    res_text = res_card.inner_text().strip().lower()
+                    if any(txt.lower() in res_text for txt in possible_texts):
+                        logging.info(f"    ▶ Matched reservation card (index {k}): {res_text.replace(chr(10), ' | ')}")
+                        # Look for “RELEASE” inside this reservation card
+                        try:
+                            release_btn = res_card.locator('button:has-text("RELEASE")').nth(0)
+                            release_text = release_btn.inner_text().strip()
+                            logging.info(f"     ⚠️  RELEASE button was found with text: {release_text!r}")
+                            found_release_in_res = True
+                        except Exception:
+                            logging.warning("     ❌  RELEASE button was not found in this reservation card.")
+                        break
+
+                if not found_release_in_res:
+                    logging.error("❌  Could not locate RELEASE in My Reservations for the new booking.")
+                    debug_res_path = os.path.join(os.getcwd(), "debug_my_reservations.png")
+                    page.screenshot(path=debug_res_path, full_page=True)
+                    logging.info(f"    📸 Debug screenshot (My Reservations) saved to {debug_res_path!r}")
 
             browser.close()
 
     except Exception as e:
-        logging.error(f"❌ Unexpected error in main(): {e}")
+        logging.error(f"❌  Unexpected error in main(): {e}")
