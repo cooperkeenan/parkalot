@@ -1,9 +1,13 @@
+# .github/workflows/parkalot-start.yml
 name: 🟢 Start Parkalot
 
-# run daily at 10:58 UTC → 11:58 BST
 on:
+  # allow you to kick it off by hand (for testing)
+  workflow_dispatch:
+
+  # everyday at 10:58 UTC → 11:58 BST
   schedule:
-    - cron: '29 19 * * *'
+    - cron: '58 10 * * *'
 
 jobs:
   start-container:
@@ -17,7 +21,7 @@ jobs:
       - name: Set default resource group
         run: az configure --defaults group=parkalot-rg
 
-      - name: Start container
+      - name: Start the Parkalot container
         run: |
           az container create \
             --name parkalot-cron \
