@@ -58,14 +58,15 @@ def start_browser():
 def wait_for_reservation_time():
     if ACTIVE:
         now = datetime.utcnow()
-        target_time = now.replace(hour=20, minute=20, second=0, microsecond=0)
+        # Set to 11:00:01 UTC (12:00:01 UK BST)
+        target_time = now.replace(hour=20, minute=59, second=1, microsecond=0)
         if target_time <= now:
             target_time += timedelta(days=1)
         wait_secs = (target_time - now).total_seconds()
         logging.info(f"Sleeping for {wait_secs:.0f}s until {target_time.time()} UTC (12:00:01 UK time)")
         time.sleep(wait_secs)
     else:
-        logging.info("ACTIVE=False: Skipping wait, running immediately for testing")
+        logging.info("ACTIVE=False: Skipping wait, running immediately for testing")VE=False: Skipping wait, running immediately for testing")
 
 
 # Reload the calendar page

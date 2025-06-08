@@ -1,25 +1,27 @@
 #!/bin/bash
+set -e
 
 echo "Starting Parkalot container..."
 echo "Current time: $(date)"
 echo "Environment variables set:"
-env | grep PARKALOT
+env | grep -E 'PARKALOT|PLAYWRIGHT_BROWSERS_PATH' || true
+echo
 
-# write out our cron job (with env vars baked in)
-cat <<EOF > /etc/cron.d/parkalot-cron
-SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-PARKALOT_USER=$PARKALOT_USER
-PARKALOT_PASS=$PARKALOT_PASS
-18 20 * * *   root    /app/run_reservation.sh
-EOF
+# Make sure the log file exists
+touch /var/log/parkalot.log
 
-chmod 0644 /etc/cron.d/parkalot-cron
+# Run the reservation script immediately
+echo "Running reservation script immediately..."
+cd /app
+export PYTHONPATH=/app
+export PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-echo "Cron job created with environment variables:"
-cat /etc/cron.d/parkalot-cron
+# Run the script and capture output
+python -m ReserveParkalot 2>&1 | tee /var/log/parkalot.log
 
-# start cron and then tail the log so the container doesn't exit
-cron
-echo "Waiting for cron job…"
-tail -f /var/log/parkalot.log
+echo "Reservation script completed at $(date)"
+echo "Exit code: $?"
+
+# Keep container alive for a bit to allow log viewing
+echo "Keeping container alive for 2 minutes for log access..."
+sleep 120
