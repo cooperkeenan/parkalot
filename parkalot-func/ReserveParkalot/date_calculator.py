@@ -15,7 +15,7 @@ class IDateCalculator(ABC):
         pass
 
 
-class DateCalculator(IDateCalculator):
+class DateService(IDateCalculator):
     def get_target_date_texts(self) -> List[str]:
         """
         Calculate the same weekday but one week ahead of today.
