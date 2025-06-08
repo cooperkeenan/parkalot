@@ -58,7 +58,7 @@ def start_browser():
 def wait_for_reservation_time():
     if ACTIVE:
         now = datetime.utcnow()
-        target_time = now.replace(hour=19, minute=55, second=0, microsecond=0)
+        target_time = now.replace(hour=20, minute=10, second=0, microsecond=0)
         if target_time <= now:
             target_time += timedelta(days=1)
         wait_secs = (target_time - now).total_seconds()

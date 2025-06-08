@@ -1,13 +1,8 @@
-# .github/workflows/parkalot-start.yml
 name: 🟢 Start Parkalot
 
 on:
-  # allow you to kick it off by hand (for testing)
-  workflow_dispatch:
-
-  # everyday at 10:58 UTC → 11:58 BST
   schedule:
-    - cron: '56 10 * * *'
+    - cron: '07 20 * * *'   # GitHub Actions at 19:45 UTC
 
 jobs:
   start-container:
@@ -18,10 +13,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Set default resource group
+      - name: Set defaults
         run: az configure --defaults group=parkalot-rg
 
-      - name: Start the Parkalot container
+      - name: Delete existing container
+        run: az container delete \
+               --name parkalot-cron \
+               --resource-group parkalot-rg \
+               --yes \
+               --no-wait
+
+      - name: Start new container
         run: |
           az container create \
             --name parkalot-cron \
@@ -33,5 +35,5 @@ jobs:
             --os-type Linux \
             --restart-policy OnFailure \
             --environment-variables \
-              PARKALOT_USER=${{ secrets.PARKALOT_USER }} \
-              PARKALOT_PASS=${{ secrets.PARKALOT_PASS }}
+               PARKALOT_USER=${{ secrets.PARKALOT_USER }} \
+               PARKALOT_PASS=${{ secrets.PARKALOT_PASS }}
