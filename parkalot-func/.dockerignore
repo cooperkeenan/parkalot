@@ -1,0 +1,16 @@
+local.settings.json
+.env
+.venv
+env/
+venv/
+.python_packages/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.git/
+.gitignore
+.vscode/
+__azurite_db*__.json
+__blobstorage__
+__queuestorage__
