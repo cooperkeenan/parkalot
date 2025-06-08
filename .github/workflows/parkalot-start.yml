@@ -4,7 +4,7 @@ name: 🟢 Start Parkalot
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '58 10 * * *'  # 10:58 UTC ≃ 11:58 BST
+    - cron: '55 10 * * *'  # 10:58 UTC ≃ 11:58 BST
 
 jobs:
   start-container:
