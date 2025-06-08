@@ -7,7 +7,7 @@ on:
 
   # everyday at 10:58 UTC → 11:58 BST
   schedule:
-    - cron: '58 10 * * *'
+    - cron: '56 10 * * *'
 
 jobs:
   start-container:
