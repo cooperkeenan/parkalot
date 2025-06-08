@@ -32,7 +32,7 @@ class VerificationService(IVerificationService):
 
         logging.info("🔍  Waiting for reservation cards to appear…")
         reservations = page.locator('div[class*="box-color"]')
-        reservations.wait_for(count=1, timeout=20000)
+        reservations.first.wait_for(state="visible", timeout=20000)
         num_res = reservations.count()
         logging.info(f"🔍  Found {num_res} reservation cards in “My Reservations.”")
 
@@ -49,17 +49,11 @@ class VerificationService(IVerificationService):
                     release_button = card.locator('button:has-text("RELEASE")')
                     release_button.wait_for(timeout=8000)
                     found_text = release_button.inner_text().strip()
-                    logging.info(f"     ✅ RELEASE button was found with text: {found_text!r}")
+                    logging.info(f"RELEASE button was found with text: {found_text!r}")
                     return True
                 except Exception:
-                    logging.warning("     ⚠️ RELEASE did NOT appear in this card. Booking may have silently failed.")
-                    debug_path = os.path.join(os.getcwd(), "after_reserve.png")
-                    page.screenshot(path=debug_path, full_page=True)
-                    logging.info(f"     📸 Screenshot saved to {debug_path!r}")
+                    logging.warning("RELEASE did NOT appear in this card. Booking may have silently failed.")
                     return False
 
-        logging.error(f"❌ Did not find any reservation card matching {target_date_texts!r} in “My Reservations.”")
-        bug_path = os.path.join(os.getcwd(), "bug_my_reservations.png")
-        page.screenshot(path=bug_path, full_page=True)
-        logging.info(f"    📸 Screenshot saved to {bug_path!r}")
+        logging.error(f"Did not find any reservation card matching {target_date_texts!r} in “My Reservations.”")
         return False

@@ -12,14 +12,10 @@ from .reservation_service import ReservationService
 from .verification_service import VerificationService
 
 
-# flip this to False to completely disable the live‐noon wait & reserve run
+# change to False to avoid wait times
 ACTIVE = False
 
 def run():
-    if not ACTIVE:
-        logging.warning("Coordinator is inactive; skipping reservation run.")
-        return
-
     # ——— 1) gather creds & target dates —————————————————————————
     try:
         email = os.environ["PARKALOT_USER"]
@@ -29,7 +25,7 @@ def run():
         return
 
     date_service = DateService()
-    target_texts = date_service.get_target_texts()
+    target_texts = date_service.get_target_date_texts()
     logging.info(f"Target date texts for reservation: {target_texts}")
 
     # ——— 2) spin up browser & do login ——————————————————————————
@@ -39,14 +35,17 @@ def run():
 
         LoginService(email, password).login(page)
 
-        # ——— 3) optionally wait until 12:00:02 UTC —————————————————
-        now = datetime.utcnow()
-        target_time = now.replace(hour=12, minute=0, second=2, microsecond=0)
-        if target_time <= now:
-            target_time += timedelta(days=1)
-        wait_secs = (target_time - now).total_seconds()
-        logging.info(f"Sleeping for {wait_secs:.0f}s until {target_time.time()} UTC")
-        time.sleep(wait_secs)
+        # ——— 3) optionally wait until 11:00:01 UTC (12:00:01 UK time) —————————————————
+        if ACTIVE:
+            now = datetime.utcnow()
+            target_time = now.replace(hour=11, minute=0, second=1, microsecond=0)
+            if target_time <= now:
+                target_time += timedelta(days=1)
+            wait_secs = (target_time - now).total_seconds()
+            logging.info(f"Sleeping for {wait_secs:.0f}s until {target_time.time()} UTC (12:00:01 UK time)")
+            time.sleep(wait_secs)
+        else:
+            logging.info("ACTIVE=False: Skipping wait, running immediately for testing")
 
         # after the wait, make sure we have the fresh calendar
         logging.info("⟲ reload calendar page")
