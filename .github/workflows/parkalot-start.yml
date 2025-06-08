@@ -25,7 +25,7 @@ jobs:
             --name parkalot-cron \
             --resource-group parkalot-rg \
             --yes \
-            --no-wait
+
 
       - name: Start new container
         run: |
