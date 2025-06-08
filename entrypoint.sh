@@ -11,7 +11,7 @@ SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 PARKALOT_USER=$PARKALOT_USER
 PARKALOT_PASS=$PARKALOT_PASS
-08 20 * * *   root    /app/run_reservation.sh
+12 20 * * *   root    /app/run_reservation.sh
 EOF
 
 chmod 0644 /etc/cron.d/parkalot-cron
