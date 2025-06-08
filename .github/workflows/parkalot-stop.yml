@@ -3,7 +3,7 @@ name: 🔴 Stop Parkalot
 # run daily at 11:02 UTC → 12:02 BST
 on:
   schedule:
-    - cron: '2 11 * * *'
+    - cron: '33 19 * * *'
 
 jobs:
   stop-container:
