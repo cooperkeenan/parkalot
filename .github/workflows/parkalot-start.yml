@@ -3,7 +3,7 @@ name: 🟢 Start Parkalot
 # run daily at 10:58 UTC → 11:58 BST
 on:
   schedule:
-    - cron: '27 19 * * *'
+    - cron: '29 19 * * *'
 
 jobs:
   start-container:
