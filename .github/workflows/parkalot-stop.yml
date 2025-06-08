@@ -1,0 +1,24 @@
+name: 🔴 Stop Parkalot
+
+# run daily at 11:02 UTC → 12:02 BST
+on:
+  schedule:
+    - cron: '2 11 * * *'
+
+jobs:
+  stop-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set default resource group
+        run: az configure --defaults group=parkalot-rg
+
+      - name: Delete container
+        run: az container delete \
+              --name parkalot-cron \
+              --yes
+
