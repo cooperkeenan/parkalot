@@ -21,4 +21,3 @@ jobs:
         run: az container delete \
               --name parkalot-cron \
               --yes
-

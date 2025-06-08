@@ -31,4 +31,3 @@ jobs:
             --environment-variables \
               PARKALOT_USER=${{ secrets.PARKALOT_USER }} \
               PARKALOT_PASS=${{ secrets.PARKALOT_PASS }}
-
