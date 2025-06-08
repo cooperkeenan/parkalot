@@ -1,9 +1,11 @@
 name: 🔴 Stop Parkalot
 
-# run daily at 11:02 UTC → 12:02 BST
 on:
+  # daily at 12:02 UTC → 13:02 BST
   schedule:
-    - cron: '02 11 * * *'
+    - cron: '2 12 * * *'
+  # allow manual runs from the Actions UI or via `gh workflow run`
+  workflow_dispatch:
 
 jobs:
   stop-container:
@@ -14,10 +16,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Set default resource group
-        run: az configure --defaults group=parkalot-rg
-
-      - name: Delete container
-        run: az container delete \
-              --name parkalot-cron \
-              --yes
+      - name: Stop (delete) container
+        run: |
+          az container delete \
+            --resource-group parkalot-rg \
+            --name parkalot-cron \
+            --yes
