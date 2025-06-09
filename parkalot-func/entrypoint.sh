@@ -19,7 +19,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 PARKALOT_USER=${PARKALOT_USER}
 PARKALOT_PASS=${PARKALOT_PASS}
- 58 11 * * *   root  /app/run_reservation.sh
+ 56 10 * * *   root  /app/run_reservation.sh
 CRON
 
 chmod 0644 /etc/cron.d/parkalot-cron

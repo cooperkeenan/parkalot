@@ -3,7 +3,7 @@ name: 🔴 Stop Parkalot
 on:
   # daily at 12:02 UTC → 13:02 BST
   schedule:
-    - cron: '2 12 * * *'
+    - cron: '02 11 * * *'
   # allow manual runs from the Actions UI or via `gh workflow run`
   workflow_dispatch:
 
