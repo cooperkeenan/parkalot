@@ -59,7 +59,7 @@ def wait_for_reservation_time():
     if ACTIVE:
         now = datetime.utcnow()
         # Set to 11:00:01 UTC (12:00:01 UK BST)
-        target_time = now.replace(hour=11, minute=0, second=2, microsecond=0)
+        target_time = now.replace(hour=11, minute=0, second=10, microsecond=0)
         if target_time <= now:
             target_time += timedelta(days=1)
         wait_secs = (target_time - now).total_seconds()
