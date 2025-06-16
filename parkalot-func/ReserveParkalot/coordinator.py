@@ -59,7 +59,7 @@ def wait_for_reservation_time():
     if ACTIVE:
         now = datetime.utcnow()
         # Set to 11:00:01 UTC (12:00:01 UK BST)
-        target_time = now.replace(hour=11, minute=0, second=10, microsecond=0)
+        target_time = now.replace(hour=11, minute=0, second=13, microsecond=0)
         if target_time <= now:
             target_time += timedelta(days=1)
         wait_secs = (target_time - now).total_seconds()
@@ -79,3 +79,7 @@ def refresh_calendar(page: Page):
 def cleanup_browser(playwright_instance, browser: Browser):
     browser.close()
     playwright_instance.stop()
+
+
+# LOOKING FOR WRONG DATE
+# 2025-06-16 11:00:21,529 - root - ERROR - Could not find a RESERVE button for any of ['23th June', '23 June']
