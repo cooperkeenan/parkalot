@@ -13,7 +13,7 @@ from .verification_service import IVerificationService, VerificationService
 
 
 # Change to False to avoid wait times for testing
-ACTIVE = True
+ACTIVE = False
 
 # Get email and password from environment variables
 def get_credentials():
