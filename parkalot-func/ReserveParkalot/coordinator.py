@@ -10,10 +10,12 @@ from .login_service import ILoginService, LoginService
 from .date_calculator import IDateCalculator, DateService
 from .reservation_service import IReservationService, ReservationService
 from .verification_service import IVerificationService, VerificationService
+from .notification_service import INotificationService
+from .notification_factory import NotificationFactory
 
 
 # Change to False to avoid wait times for testing
-ACTIVE = False
+ACTIVE = True
 
 # Get email and password from environment variables
 def get_credentials():
@@ -36,14 +38,15 @@ def get_target_dates(date_calculator: IDateCalculator = None):
     return target_texts
     
 
-# Ceate all service instances with dependency injection
+# Create all service instances with dependency injection
 def create_services(email: str, password: str):
     date_calculator: IDateCalculator = DateService()
     login_service: ILoginService = LoginService(email, password)
     reservation_service: IReservationService = ReservationService()
     verification_service: IVerificationService = VerificationService()
+    notification_service: INotificationService = NotificationFactory.create_notification_service()
     
-    return date_calculator, login_service, reservation_service, verification_service
+    return date_calculator, login_service, reservation_service, verification_service, notification_service
 
 
 # Start Playwright browser and return browser and page objects

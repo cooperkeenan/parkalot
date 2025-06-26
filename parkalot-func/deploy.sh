@@ -41,6 +41,23 @@ if az container show --resource-group "$RG" --name "$CONTAINER_NAME" &>/dev/null
   az container delete --resource-group "$RG" --name "$CONTAINER_NAME" --yes
 fi
 
+# Prepare environment variables array
+ENV_VARS="PARKALOT_USER=$PARKALOT_USER PARKALOT_PASS=$PARKALOT_PASS"
+
+# Add Twilio variables if they exist
+if [ -n "${TWILIO_SID:-}" ]; then
+  ENV_VARS="$ENV_VARS TWILIO_SID=$TWILIO_SID"
+fi
+if [ -n "${TWILIO_AUTH_TOKEN:-}" ]; then
+  ENV_VARS="$ENV_VARS TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN"
+fi
+if [ -n "${TWILIO_FROM_NUMBER:-}" ]; then
+  ENV_VARS="$ENV_VARS TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER"
+fi
+if [ -n "${TWILIO_TO_NUMBER:-}" ]; then
+  ENV_VARS="$ENV_VARS TWILIO_TO_NUMBER=$TWILIO_TO_NUMBER"
+fi
+
 # Create or recreate container instance
 echo "→ Creating container group $CONTAINER_NAME..."
 az container create \
@@ -53,10 +70,7 @@ az container create \
   --cpu 0.5 --memory 1 \
   --os-type Linux \
   --restart-policy OnFailure \
-  --environment-variables \
-      PARKALOT_USER="$PARKALOT_USER" \
-      PARKALOT_PASS="$PARKALOT_PASS"
+  --environment-variables $ENV_VARS
 
 echo " "
 echo " Deployment complete."
-
