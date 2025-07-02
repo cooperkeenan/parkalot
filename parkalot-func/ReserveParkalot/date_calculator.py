@@ -29,8 +29,8 @@ class DateService(IDateCalculator):
         # Get the correct ordinal suffix
         ordinal_suffix = self._get_ordinal_suffix(day_number)
         
-        #return [f"{day_number}{ordinal_suffix} {month_name}", f"{day_number} {month_name}"]
-        return ["29th June", "29 June"]
+        return [f"{day_number}{ordinal_suffix} {month_name}", f"{day_number} {month_name}"]
+        #return ["29th June", "29 June"]
     
     def _get_ordinal_suffix(self, day: int) -> str:
         """Return the ordinal suffix for a given day number."""
