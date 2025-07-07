@@ -68,6 +68,7 @@ start_container() {
         --image parkalotacr7620.azurecr.io/parkalot:latest \
         --cpu 0.5 \
         --memory 1 \
+	--os-type Linux \
         --registry-login-server parkalotacr7620.azurecr.io \
         --registry-username parkalotacr7620 \
         --registry-password "$ACR_PASSWORD" \
