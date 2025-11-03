@@ -23,7 +23,7 @@ TWILIO_SID=${TWILIO_SID:-}
 TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN:-}
 TWILIO_FROM_NUMBER=${TWILIO_FROM_NUMBER:-}
 TWILIO_TO_NUMBER=${TWILIO_TO_NUMBER:-}
-57 10 * * *   root  /app/run_reservation.sh
+57 11 * * *   root  /app/run_reservation.sh
 CRON
 
 chmod 0644 /etc/cron.d/parkalot-cron
