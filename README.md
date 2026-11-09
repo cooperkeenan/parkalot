@@ -1,5 +1,11 @@
 # Parkalot automates the daily reservation process of booking a parking spot
 
+## Timing
+
+Spaces are released at 12:00 UK time. Each run waits until 12:00:06 UK time before booking, using the Europe/London time zone, so it adjusts automatically when the clocks change.
+
+The Logic App must start the container before 12:00 UK time all year round. A start time of 10:50 UTC does this: it is 10:50 in winter and 11:50 in summer. If a run starts after booking opens, it tries straight away and logs a warning.
+
 ## Run logs
 
 Each run saves its full log as one file in Azure Blob Storage, so the history survives after the container is deleted. Files go in the `parkalot-logs` container, named by start time and outcome:

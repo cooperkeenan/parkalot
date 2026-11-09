@@ -3,8 +3,13 @@
 import os
 import time
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, time as dtime, timezone
 from playwright.sync_api import sync_playwright, Page, Browser
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # Python 3.8 in the Docker image
+    from backports.zoneinfo import ZoneInfo
 
 from .login_service import ILoginService, LoginService
 from .date_calculator import IDateCalculator, DateService
@@ -57,19 +62,41 @@ def start_browser():
     return p, browser, page
 
 
-# Wait until 11:00:01 UTC (12:00:01 UK time) if ACTIVE is True
+# Parkalot releases spaces at 12:00 UK time. Using the Europe/London time zone
+# means this follows the clocks changing (GMT in winter, BST in summer).
+UK_TZ = ZoneInfo("Europe/London")
+BOOKING_OPENS_UK = dtime(12, 0, 6)  # a few seconds after opening
+
+
+# Work out how long to wait until booking opens today, in UK time
+def seconds_until_booking_opens(now_utc: datetime):
+    now_uk = now_utc.astimezone(UK_TZ)
+    target_uk = datetime.combine(now_uk.date(), BOOKING_OPENS_UK, tzinfo=UK_TZ)
+    target_utc = target_uk.astimezone(timezone.utc)
+    return (target_utc - now_utc).total_seconds(), target_utc
+
+
+# Wait until booking opens (12:00:06 UK time) if ACTIVE is True
 def wait_for_reservation_time():
-    if ACTIVE:
-        now = datetime.utcnow()
-        # Set to 11:00:01 UTC (12:00:01 UK BST)
-        target_time = now.replace(hour=12, minute=0, second=6, microsecond=0)
-        if target_time <= now:
-            target_time += timedelta(days=1)
-        wait_secs = (target_time - now).total_seconds()
-        logging.info(f"Sleeping for {wait_secs:.0f}s until {target_time.time()} UTC (12:00:01 UK time)")
+    if not ACTIVE:
+        logging.info("ACTIVE=False: Skipping wait, running immediately for testing")
+        return
+
+    wait_secs, target_utc = seconds_until_booking_opens(datetime.now(timezone.utc))
+    opens_uk = BOOKING_OPENS_UK.strftime("%H:%M:%S")
+    if wait_secs > 0:
+        logging.info(
+            f"Sleeping for {wait_secs:.0f}s until {opens_uk} UK time "
+            f"({target_utc:%H:%M:%S} UTC)"
+        )
         time.sleep(wait_secs)
     else:
-        logging.info("ACTIVE=False: Skipping wait, running immediately for testing")
+        # Started late: try now rather than waiting until tomorrow
+        logging.warning(
+            f"Run started {-wait_secs / 60:.1f} minutes after booking opened at "
+            f"{opens_uk} UK time ({target_utc:%H:%M:%S} UTC); trying immediately. "
+            "Check the Logic App start time."
+        )
 
 
 # Reload the calendar page

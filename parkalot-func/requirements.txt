@@ -1,4 +1,6 @@
 azure-functions
 azure-storage-blob>=12.19,<13
+backports.zoneinfo; python_version < "3.9"
 playwright==1.41.0
 twilio==8.10.0
+tzdata
