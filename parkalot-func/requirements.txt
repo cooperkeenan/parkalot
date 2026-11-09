@@ -1,6 +1,4 @@
-
 azure-functions
+azure-storage-blob>=12.19,<13
 playwright==1.41.0
 twilio==8.10.0
-
-

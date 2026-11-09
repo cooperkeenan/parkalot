@@ -46,3 +46,6 @@ __pycache__/
 __blobstorage__
 __queuestorage__
 __azurite_db*__.json
+# Run logs saved locally when Blob Storage is not configured
+/logs/*.log
+!/logs/parkalot.log
